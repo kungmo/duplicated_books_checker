@@ -1,0 +1,71 @@
+Sub 독서중복찾기()
+
+    Cells.Replace What:="), ", Replacement:=")\", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False, FormulaVersion:=xlReplaceFormula2
+
+Columns("E:E").Select
+Selection.SpecialCells(xlCellTypeBlanks).Select
+Selection.EntireRow.Delete
+Columns("B:B").Select
+Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+Range("B2").Select
+ActiveCell.FormulaR1C1 = "=IF(ISBLANK(RC[-1]),R[-1]C,RC[-1])"
+Range("B2").Select
+Selection.AutoFill Destination:=Range("B2:B400"), Type:=xlFillDefault
+
+
+Sheets.Add After:=ActiveSheet
+Worksheets(2).Cells(1, 2) = "이름"
+Worksheets(2).Cells(1, 3) = "독서활동"
+Worksheets(2).Cells(1, 4) = "중복의심"
+
+    
+
+Dim books() As String ' 배열을 선언합니다.
+Dim row_num As Integer
+Dim lastRow As Long
+
+row_num = 2
+lastRow = Sheet1.Cells(Rows.Count, 1).End(xlUp).Row
+
+For j = 2 To lastRow + 1
+
+    books = Split(Worksheets(1).Cells(j, 7), "\")
+    
+    For i = 0 To UBound(books) ' UBound는 배열의 마지막 위치를 반환하는 함수입니다.
+        Worksheets(2).Cells(row_num, 2) = Worksheets(1).Cells(j, 2)
+        Worksheets(2).Cells(row_num, 3) = books(i)
+        row_num = row_num + 1
+    Next i
+
+Next j
+
+
+
+    Range("C1").Select
+    ActiveWorkbook.Worksheets("Sheet2").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet2").Sort.SortFields.Add2 Key:=Range("B2:B1000" _
+        ), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    ActiveWorkbook.Worksheets("Sheet2").Sort.SortFields.Add2 Key:=Range("C2:C1000" _
+        ), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("Sheet2").Sort
+        .SetRange Range("B1:D1000")
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    Columns("C:C").EntireColumn.AutoFit
+    Range("D2").Select
+    ActiveCell.FormulaR1C1 = _
+        "=IF(AND(RC[-2]=R[-1]C[-2],RC[-1]=R[-1]C[-1]),""삭제필요"","""")"
+    Range("D2").Select
+    Selection.AutoFill Destination:=Range("D2:D384")
+    Range("D2:D1000").Select
+    Range("D1").Select
+    Selection.AutoFilter
+    ActiveSheet.Range("$B$1:$D$1000").AutoFilter Field:=3, Criteria1:="<>"
+End Sub
+

@@ -1,0 +1,23 @@
+Sub 직사각형1_Click()
+
+Dim books() As String ' 배열을 선언합니다.
+Dim row_num As Integer
+Dim lastRow As Long
+
+row_num = 2
+lastRow = Sheet1.Cells(Rows.Count, 1).End(xlUp).Row
+
+For j = 2 To lastRow + 1
+
+    books = Split(Cells(j, 7), "\")
+    
+    For i = 0 To UBound(books) ' UBound는 배열의 마지막 위치를 반환하는 함수입니다.
+        Worksheets(2).Cells(row_num, 2) = Cells(j, 2)
+        Worksheets(2).Cells(row_num, 3) = books(i)
+        row_num = row_num + 1
+    Next i
+
+Next j
+
+End Sub
+
